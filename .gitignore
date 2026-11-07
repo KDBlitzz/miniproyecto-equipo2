@@ -1,0 +1,19 @@
+# Entornos y caches
+venv/
+.venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Dataset: NO se sube, cada quien lo descarga con nucleo.datos.descargar_dataset()
+data/*.csv
+data/*.parquet
+!data/.gitkeep
+
+# Salidas temporales de experimentos (las figuras y artefactos finales SI se commitean)
+artefactos/tmp/
+*.log

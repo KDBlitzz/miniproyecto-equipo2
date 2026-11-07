@@ -1,0 +1,17 @@
+# Capa 1 - nucleo PyTorch
+torch>=2.2
+numpy>=1.26
+pandas>=2.1
+scikit-learn>=1.4
+matplotlib>=3.8
+joblib>=1.3
+# Capa 2 - API
+fastapi>=0.110
+uvicorn[standard]>=0.29
+pydantic>=2.6
+httpx>=0.27
+# Capa 3 - Dashboard
+streamlit>=1.33
+# Notebooks en VS Code
+ipykernel>=6.29
+jupyter>=1.0
