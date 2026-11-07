@@ -1,7 +1,9 @@
 """Arquitectura topológica (Capa 1B – Persona 2).
 
+Entrada: 29 características (V1..V28 + Amount); el dataset de OpenML no trae "Time".
+
 Punto de partida acordado por el equipo (sección 2.2 del reparto):
-    30 → Linear(64) → BatchNorm1d → ReLU → Dropout(0.3)
+    29 → Linear(64) → BatchNorm1d → ReLU → Dropout(0.3)
        → Linear(32) → BatchNorm1d → ReLU → Dropout(0.3)
        → Linear(1)  (logit; la sigmoide vive en la pérdida y en la inferencia)
 
@@ -15,7 +17,7 @@ import torch.nn as nn
 class DetectorFraudeMLP(nn.Module):
     """Perceptrón multicapa para clasificación binaria de transacciones."""
 
-    def __init__(self, dim_entrada: int = 30, dims_ocultas=(64, 32), p_dropout: float = 0.3) -> None:
+    def __init__(self, dim_entrada: int = 29, dims_ocultas=(64, 32), p_dropout: float = 0.3) -> None:
         super().__init__()
         # __init__ contiene las capas
         self.capa1 = nn.Linear(dim_entrada, dims_ocultas[0])
@@ -40,4 +42,4 @@ class DetectorFraudeMLP(nn.Module):
 if __name__ == "__main__":
     modelo = DetectorFraudeMLP()
     print(modelo)
-    print("Parámetros entrenables:", modelo.contar_parametros())  # 4289 con 30→64→32→1
+    print("Parámetros entrenables:", modelo.contar_parametros())  # 4225 con 29→64→32→1

@@ -17,3 +17,6 @@ data/*.parquet
 # Salidas temporales de experimentos (las figuras y artefactos finales SI se commitean)
 artefactos/tmp/
 *.log
+
+# Figuras de pruebas de humo (no son las finales)
+artefactos/figuras/prueba_*
