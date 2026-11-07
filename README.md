@@ -24,7 +24,7 @@ ejecutivo en Streamlit con alertas en tiempo real (Capa 3).
 ## Instalación (una sola vez)
 
 ```bash
-git clone https://github.com/<usuario>/miniproyecto-equipo2.git
+git clone https://github.com/KDBlitzz/miniproyecto-equipo2.git
 cd miniproyecto-equipo2
 python -m venv venv
 # Windows:
@@ -63,6 +63,7 @@ streamlit run dashboard/app.py
 ## Contrato de la API (no se modifica sin avisar al grupo)
 
 `POST /api/v1/transacciones` → `{"id_transaccion", "monto", "tiempo", "caracteristicas": [28 valores V1..V28]}`
+(el modelo recibe 29 entradas: las 28 características + `monto`; `tiempo` es solo metadato para el dashboard)
 → `{"id_transaccion", "status": "approved"|"blocked", "probabilidad_fraude", "umbral", "latencia_ms"}`
 
 `POST /api/v1/transacciones/lote` → `{"transacciones": [...]}` → `{"resultados": [...], "latencia_total_ms", "procesadas"}`
