@@ -1,0 +1,21 @@
+{
+  "etiqueta": "ponderada_sqrt_adamw_64-32_d0.4_wd0.001",
+  "perdida": "ponderada_sqrt",
+  "optimizador": "adamw",
+  "ocultas": [
+    64,
+    32
+  ],
+  "dropout": 0.4,
+  "wd": 0.001,
+  "alpha": null,
+  "gamma": null,
+  "parametros": 4225,
+  "umbral": 0.93,
+  "epoca_mejor": 14,
+  "epocas_corridas": 19,
+  "precision": 0.8,
+  "recall": 0.7567567567567568,
+  "f1": 0.7777777777777778,
+  "pr_auc": 0.6601456934757617
+}
