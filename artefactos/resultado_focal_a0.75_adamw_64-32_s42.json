@@ -1,5 +1,5 @@
 {
-  "etiqueta": "focal_a0.75_adamw_64-32",
+  "etiqueta": "focal_a0.75_adamw_64-32_s42",
   "perdida": "focal",
   "optimizador": "adamw",
   "ocultas": [
@@ -11,6 +11,7 @@
   "alpha": 0.75,
   "gamma": 2.0,
   "parametros": 4225,
+  "semilla": 42,
   "umbral": 0.6,
   "epoca_mejor": 50,
   "epocas_corridas": 58,

@@ -38,6 +38,7 @@
     "Amount"
   ],
   "perdida": "focal",
+  "semilla": 42,
   "alpha": 0.75,
   "gamma": 2.0
 }

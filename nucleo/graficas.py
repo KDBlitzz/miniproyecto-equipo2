@@ -72,7 +72,7 @@ def tabla_y_comparativa(carpeta: Path = ARTEFACTOS):
     if not filas:
         return None
     df = pd.DataFrame(filas)
-    cols = ["etiqueta", "perdida", "optimizador", "ocultas", "parametros", "umbral",
+    cols = ["etiqueta", "perdida", "semilla", "optimizador", "ocultas", "parametros", "umbral",
             "precision", "recall", "f1", "pr_auc", "epoca_mejor", "epocas_corridas"]
     df = df[[c for c in cols if c in df.columns]].sort_values("pr_auc", ascending=False)
     df.to_csv(carpeta / "tabla_comparativa.csv", index=False)
@@ -93,8 +93,28 @@ def tabla_y_comparativa(carpeta: Path = ARTEFACTOS):
     return df
 
 
+def tabla_semillas(carpeta: Path = ARTEFACTOS) -> pd.DataFrame | None:
+    """Resume media y desviación muestral de las corridas identificadas por semilla."""
+    filas = [json.load(open(r, encoding="utf-8")) for r in sorted(carpeta.glob("resultado_*.json"))]
+    df = pd.DataFrame(filas)
+    if "semilla" not in df or df["semilla"].isna().all():
+        return None
+    df = df.dropna(subset=["semilla"])
+    # Se agrupa también por optimizador: una corrida con SGD no debe promediarse con las de AdamW
+    resumen = (df.groupby(["perdida", "optimizador"])[["f1", "pr_auc"]]
+                 .agg(["mean", "std", "count"])
+                 .reset_index())
+    resumen.columns = ["perdida", "optimizador", "f1_media", "f1_desviacion", "f1_n",
+                       "pr_auc_media", "pr_auc_desviacion", "pr_auc_n"]
+    resumen.to_csv(carpeta / "tabla_semillas.csv", index=False)
+    return resumen
+
+
 if __name__ == "__main__":
     print("Curvas de loss:", [r.name for r in curvas_loss()])
     print("PR-AUC por época:", pr_auc_por_epoca())
     t = tabla_y_comparativa()
     print(t.to_string(index=False) if t is not None else "Aún no hay resultado_*.json: corre los experimentos.")
+    s = tabla_semillas()
+    print("Resumen por semillas:")
+    print(s.to_string(index=False) if s is not None else "Aún no hay resultados con semilla.")

@@ -128,6 +128,8 @@ def principal() -> None:
     ap.add_argument("--optimizador", choices=["adamw", "sgd"], default="adamw")
     ap.add_argument("--epocas", type=int, default=30)
     ap.add_argument("--paciencia", type=int, default=5)
+    ap.add_argument("--semilla", type=int, default=42,
+                    help="semilla para la partición, el barajado y la inicialización del modelo")
     ap.add_argument("--lote", type=int, default=512)
     ap.add_argument("--lr", type=float, default=1e-3)
     ap.add_argument("--dropout", type=float, default=0.3)
@@ -141,8 +143,8 @@ def principal() -> None:
     ap.add_argument("--exportar", action="store_true", help="escribe modelo_fraude.pth y config_inferencia.json")
     a = ap.parse_args()
 
-    torch.manual_seed(42)
-    datos = crear_dataloaders(a.lote)          # diccionario (ver docstring de nucleo/datos.py)
+    torch.manual_seed(a.semilla)
+    datos = crear_dataloaders(a.lote, semilla=a.semilla)  # diccionario (ver docstring de nucleo/datos.py)
     loader_train, loader_val = datos["loader_train"], datos["loader_val"]
     n_pos = datos["dataset_train"].n_positivos
     n_neg = len(datos["dataset_train"]) - n_pos
@@ -162,8 +164,8 @@ def principal() -> None:
     ent = Entrenador(modelo, perdida, opt)
     ent.entrenar(loader_train, loader_val, epocas=a.epocas, paciencia=a.paciencia)
 
-    # Etiqueta única por experimento: nombra el historial y el resultado
-    etiqueta = f"{a.perdida}{'_a' + str(a.alpha) if a.perdida == 'focal' else ''}_{a.optimizador}_{'-'.join(map(str, a.ocultas))}"
+    # La semilla forma parte del nombre para que las repeticiones no se sobrescriban.
+    etiqueta = f"{a.perdida}{'_a' + str(a.alpha) if a.perdida == 'focal' else ''}_{a.optimizador}_{'-'.join(map(str, a.ocultas))}_s{a.semilla}"
     if a.dropout != 0.3 or a.wd != 1e-4:
         etiqueta += f"_d{a.dropout}_wd{a.wd}"
 
@@ -185,13 +187,14 @@ def principal() -> None:
                  "ocultas": a.ocultas, "dropout": a.dropout, "wd": a.wd,
                  "alpha": a.alpha if a.perdida == "focal" else None,
                  "gamma": a.gamma if a.perdida == "focal" else None,
-                 "parametros": modelo.contar_parametros(), "umbral": float(umbral),
+                 "parametros": modelo.contar_parametros(), "semilla": a.semilla,
+                 "umbral": float(umbral),
                  "epoca_mejor": int(np.argmax(h)) + 1, "epocas_corridas": len(h), **m}
     with open(RUTA_ARTEFACTOS / f"resultado_{etiqueta}.json", "w", encoding="utf-8") as f:
         json.dump(resultado, f, indent=2, ensure_ascii=False)
 
     if a.exportar:
-        extra = {"columnas": COLUMNAS_ENTRADA, "perdida": a.perdida}
+        extra = {"columnas": COLUMNAS_ENTRADA, "perdida": a.perdida, "semilla": a.semilla}
         if a.perdida == "focal":
             extra.update({"alpha": a.alpha, "gamma": a.gamma})
         ent.guardar(RUTA_ARTEFACTOS / "modelo_fraude.pth", RUTA_ARTEFACTOS / "config_inferencia.json",
