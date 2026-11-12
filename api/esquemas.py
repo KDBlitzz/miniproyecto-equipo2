@@ -1,15 +1,22 @@
 
-"""Esquemas del contrato HTTP entre el dashboard y la API."""
-from typing import Literal
+from typing import Literal, Annotated
 
 from pydantic import BaseModel, Field
+
+# Tipo numérico que rechaza NaN e infinitos
+NumeroFinito = Annotated[float, Field(allow_inf_nan=False)]
 
 
 class Transaccion(BaseModel):
     id_transaccion: str = Field(min_length=1)
     monto: float = Field(ge=0, allow_inf_nan=False)
     tiempo: float = Field(ge=0, allow_inf_nan=False)
-    caracteristicas: list[float] = Field(min_length=28, max_length=28)
+
+    # Exactamente 28 características numéricas y finitas
+    caracteristicas: list[NumeroFinito] = Field(
+        min_length=28,
+        max_length=28
+    )
 
 
 class Resultado(BaseModel):
