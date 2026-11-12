@@ -1,14 +1,15 @@
-"""Esquemas Pydantic del contrato de la API (Capa 2 – Persona 3)."""
-from typing import List, Literal
+
+"""Esquemas del contrato HTTP entre el dashboard y la API."""
+from typing import Literal
 
 from pydantic import BaseModel, Field
 
 
 class Transaccion(BaseModel):
-    id_transaccion: str
-    monto: float = Field(ge=0)
-    tiempo: float = Field(ge=0)
-    caracteristicas: List[float] = Field(min_length=28, max_length=28)  # V1..V28
+    id_transaccion: str = Field(min_length=1)
+    monto: float = Field(ge=0, allow_inf_nan=False)
+    tiempo: float = Field(ge=0, allow_inf_nan=False)
+    caracteristicas: list[float] = Field(min_length=28, max_length=28)
 
 
 class Resultado(BaseModel):
@@ -20,10 +21,10 @@ class Resultado(BaseModel):
 
 
 class Lote(BaseModel):
-    transacciones: List[Transaccion]
+    transacciones: list[Transaccion] = Field(min_length=1)
 
 
 class ResultadoLote(BaseModel):
-    resultados: List[Resultado]
+    resultados: list[Resultado]
     latencia_total_ms: float
     procesadas: int
