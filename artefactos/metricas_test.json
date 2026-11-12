@@ -1,0 +1,33 @@
+{
+  "umbral": 0.6,
+  "perdida": "focal",
+  "validacion": {
+    "umbral": 0.6,
+    "accuracy": 0.9992041384799045,
+    "precision_fraude": 0.7631578947368421,
+    "recall_fraude": 0.7837837837837838,
+    "f1_fraude": 0.7733333333333334,
+    "especificidad": 0.9995779304523179,
+    "pr_auc": 0.7694699218841754,
+    "roc_auc": 0.9494869573538648,
+    "tn": 42629,
+    "fp": 18,
+    "fn": 16,
+    "tp": 58
+  },
+  "prueba": {
+    "umbral": 0.6,
+    "accuracy": 0.9994382285473526,
+    "precision_fraude": 0.8787878787878788,
+    "recall_fraude": 0.7837837837837838,
+    "f1_fraude": 0.8285714285714285,
+    "especificidad": 0.9998124179328456,
+    "pr_auc": 0.8286237512207958,
+    "roc_auc": 0.9781774247517072,
+    "tn": 42640,
+    "fp": 8,
+    "fn": 16,
+    "tp": 58
+  },
+  "accuracy_modelo_trivial": 0.9982678713543374
+}
