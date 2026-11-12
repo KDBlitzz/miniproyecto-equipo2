@@ -1,0 +1,22 @@
+{
+  "etiqueta": "focal_a0.75_adamw_64-32_s42",
+  "perdida": "focal",
+  "optimizador": "adamw",
+  "ocultas": [
+    64,
+    32
+  ],
+  "dropout": 0.3,
+  "wd": 0.0001,
+  "alpha": 0.75,
+  "gamma": 2.0,
+  "parametros": 4225,
+  "semilla": 42,
+  "umbral": 0.6,
+  "epoca_mejor": 50,
+  "epocas_corridas": 58,
+  "precision": 0.7631578947368421,
+  "recall": 0.7837837837837838,
+  "f1": 0.7733333333333334,
+  "pr_auc": 0.7694699218841754
+}
