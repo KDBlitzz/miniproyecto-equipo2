@@ -128,6 +128,8 @@ def principal() -> None:
     ap.add_argument("--optimizador", choices=["adamw", "sgd"], default="adamw")
     ap.add_argument("--epocas", type=int, default=30)
     ap.add_argument("--paciencia", type=int, default=5)
+    ap.add_argument("--semilla", type=int, default=42,
+                    help="semilla para la partición, el barajado y la inicialización del modelo")
     ap.add_argument("--lote", type=int, default=512)
     ap.add_argument("--lr", type=float, default=1e-3)
     ap.add_argument("--dropout", type=float, default=0.3)
@@ -141,8 +143,8 @@ def principal() -> None:
     ap.add_argument("--exportar", action="store_true", help="escribe modelo_fraude.pth y config_inferencia.json")
     a = ap.parse_args()
 
-    torch.manual_seed(42)
-    datos = crear_dataloaders(a.lote)          # diccionario (ver docstring de nucleo/datos.py)
+    torch.manual_seed(a.semilla)
+    datos = crear_dataloaders(a.lote, semilla=a.semilla)  # diccionario (ver docstring de nucleo/datos.py)
     loader_train, loader_val = datos["loader_train"], datos["loader_val"]
     n_pos = datos["dataset_train"].n_positivos
     n_neg = len(datos["dataset_train"]) - n_pos
