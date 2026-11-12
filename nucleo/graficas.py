@@ -100,10 +100,11 @@ def tabla_semillas(carpeta: Path = ARTEFACTOS) -> pd.DataFrame | None:
     if "semilla" not in df or df["semilla"].isna().all():
         return None
     df = df.dropna(subset=["semilla"])
-    resumen = (df.groupby("perdida")[["f1", "pr_auc"]]
+    # Se agrupa también por optimizador: una corrida con SGD no debe promediarse con las de AdamW
+    resumen = (df.groupby(["perdida", "optimizador"])[["f1", "pr_auc"]]
                  .agg(["mean", "std", "count"])
                  .reset_index())
-    resumen.columns = ["perdida", "f1_media", "f1_desviacion", "f1_n",
+    resumen.columns = ["perdida", "optimizador", "f1_media", "f1_desviacion", "f1_n",
                        "pr_auc_media", "pr_auc_desviacion", "pr_auc_n"]
     resumen.to_csv(carpeta / "tabla_semillas.csv", index=False)
     return resumen
