@@ -1,0 +1,22 @@
+{
+  "etiqueta": "focal_a0.75_sgd_64-32_s42",
+  "perdida": "focal",
+  "optimizador": "sgd",
+  "ocultas": [
+    64,
+    32
+  ],
+  "dropout": 0.3,
+  "wd": 0.0001,
+  "alpha": 0.75,
+  "gamma": 2.0,
+  "parametros": 4225,
+  "semilla": 42,
+  "umbral": 0.49,
+  "epoca_mejor": 78,
+  "epocas_corridas": 80,
+  "precision": 0.8088235294117647,
+  "recall": 0.7432432432432432,
+  "f1": 0.7746478873239436,
+  "pr_auc": 0.6489269104795791
+}
