@@ -127,8 +127,11 @@ def principal() -> None:
     ap.add_argument("--perdida", choices=["estandar", "ponderada", "ponderada_sqrt", "focal"], default="ponderada")
     ap.add_argument("--optimizador", choices=["adamw", "sgd"], default="adamw")
     ap.add_argument("--epocas", type=int, default=30)
+    ap.add_argument("--paciencia", type=int, default=5)
     ap.add_argument("--lote", type=int, default=512)
     ap.add_argument("--lr", type=float, default=1e-3)
+    ap.add_argument("--dropout", type=float, default=0.3)
+    ap.add_argument("--wd", type=float, default=1e-4, help="weight decay (L2)")
     ap.add_argument("--alpha", type=float, default=0.75)
     ap.add_argument("--gamma", type=float, default=2.0)
     ap.add_argument("--ocultas", type=int, nargs="+", default=[64, 32],
@@ -150,17 +153,22 @@ def principal() -> None:
                "ponderada_sqrt": lambda: bce_ponderada(n_neg, n_pos, suavizado=True),
                "focal": lambda: FocalLoss(a.alpha, a.gamma)}[a.perdida]()
 
-    dim_entrada = next(iter(loader_train))[0].shape[1]   # 29 si Persona 1 quitó Time
-    modelo = DetectorFraudeMLP(dim_entrada, tuple(a.ocultas))
+    dim_entrada = next(iter(loader_train))[0].shape[1]   # 29 (V1..V28 + Amount)
+    modelo = DetectorFraudeMLP(dim_entrada, tuple(a.ocultas), a.dropout)
     print("Parámetros entrenables:", modelo.contar_parametros())
-    opt = (torch.optim.AdamW(modelo.parameters(), lr=a.lr, weight_decay=1e-4) if a.optimizador == "adamw"
-           else torch.optim.SGD(modelo.parameters(), lr=a.lr * 10, momentum=0.9, weight_decay=1e-4))
+    opt = (torch.optim.AdamW(modelo.parameters(), lr=a.lr, weight_decay=a.wd) if a.optimizador == "adamw"
+           else torch.optim.SGD(modelo.parameters(), lr=a.lr * 10, momentum=0.9, weight_decay=a.wd))
 
     ent = Entrenador(modelo, perdida, opt)
-    ent.entrenar(loader_train, loader_val, epocas=a.epocas)
+    ent.entrenar(loader_train, loader_val, epocas=a.epocas, paciencia=a.paciencia)
+
+    # Etiqueta única por experimento: nombra el historial y el resultado
+    etiqueta = f"{a.perdida}{'_a' + str(a.alpha) if a.perdida == 'focal' else ''}_{a.optimizador}_{'-'.join(map(str, a.ocultas))}"
+    if a.dropout != 0.3 or a.wd != 1e-4:
+        etiqueta += f"_d{a.dropout}_wd{a.wd}"
 
     RUTA_ARTEFACTOS.mkdir(exist_ok=True)
-    ent.guardar_historial(RUTA_ARTEFACTOS / f"historial_{a.perdida}_{a.optimizador}_{'-'.join(map(str, a.ocultas))}.csv")
+    ent.guardar_historial(RUTA_ARTEFACTOS / f"historial_{etiqueta}.csv")
 
     _, probs, y = ent.validar(loader_val)
     try:
@@ -171,10 +179,23 @@ def principal() -> None:
     m = _metricas(probs, y, umbral)
     print(f"Umbral {umbral:.2f} -> P {m['precision']:.3f} R {m['recall']:.3f} F1 {m['f1']:.3f} PR-AUC {m['pr_auc']:.3f}")
 
+    # Resultado de este experimento (lo lee nucleo/graficas.py para la tabla comparativa)
+    h = ent.historial["pr_auc_val"]
+    resultado = {"etiqueta": etiqueta, "perdida": a.perdida, "optimizador": a.optimizador,
+                 "ocultas": a.ocultas, "dropout": a.dropout, "wd": a.wd,
+                 "alpha": a.alpha if a.perdida == "focal" else None,
+                 "gamma": a.gamma if a.perdida == "focal" else None,
+                 "parametros": modelo.contar_parametros(), "umbral": float(umbral),
+                 "epoca_mejor": int(np.argmax(h)) + 1, "epocas_corridas": len(h), **m}
+    with open(RUTA_ARTEFACTOS / f"resultado_{etiqueta}.json", "w", encoding="utf-8") as f:
+        json.dump(resultado, f, indent=2, ensure_ascii=False)
+
     if a.exportar:
+        extra = {"columnas": COLUMNAS_ENTRADA, "perdida": a.perdida}
+        if a.perdida == "focal":
+            extra.update({"alpha": a.alpha, "gamma": a.gamma})
         ent.guardar(RUTA_ARTEFACTOS / "modelo_fraude.pth", RUTA_ARTEFACTOS / "config_inferencia.json",
-                    umbral, extra={"columnas": COLUMNAS_ENTRADA, "perdida": a.perdida,
-                                   "alpha": a.alpha, "gamma": a.gamma})
+                    umbral, extra=extra)
         ent.guardar_historial(RUTA_ARTEFACTOS / "historial_entrenamiento.csv")
         print("Exportados: modelo_fraude.pth, config_inferencia.json")
 

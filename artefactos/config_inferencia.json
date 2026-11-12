@@ -5,7 +5,7 @@
     32
   ],
   "p_dropout": 0.3,
-  "umbral": 0.99,
+  "umbral": 0.6,
   "columnas": [
     "V1",
     "V2",
@@ -37,7 +37,7 @@
     "V28",
     "Amount"
   ],
-  "perdida": "ponderada",
+  "perdida": "focal",
   "alpha": 0.75,
   "gamma": 2.0
 }
