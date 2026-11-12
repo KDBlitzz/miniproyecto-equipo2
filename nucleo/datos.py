@@ -242,7 +242,11 @@ def crear_dataloaders(tamano_lote: int = 512, semilla: int = SEMILLA, df: pd.Dat
     X_train, y_train, X_val, y_val, X_test, y_test = particionar(df, semilla)
 
     escalador = Escalador().ajustar(X_train)
-    escalador.guardar()
+    # El .pkl es el artefacto que usa la API y debe corresponder al modelo exportado, que se
+    # entrena con la semilla canónica (42). Un experimento con otra semilla cambia la partición
+    # y por tanto la media/desviación: no debe sobrescribir el escalador de producción.
+    if semilla == SEMILLA:
+        escalador.guardar()
 
     dataset_train = TransaccionesDataset(escalador.transformar(X_train), y_train)
     dataset_val = TransaccionesDataset(escalador.transformar(X_val), y_val)
