@@ -3,6 +3,9 @@
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
+from fastapi.encoders import jsonable_encoder
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 
 from api.esquemas import Lote, Resultado, ResultadoLote, Transaccion
 from api.servicio_modelo import ServicioFraude
@@ -16,6 +19,14 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="Pasarela de pagos – Equipo 2", version="1.0", lifespan=lifespan)
+
+
+@app.exception_handler(RequestValidationError)
+async def entrada_invalida(request: Request, exc: RequestValidationError):
+    # El 422 por defecto repite el valor recibido; si es NaN o infinito no se puede
+    # escribir en JSON y FastAPI termina en 500. Se omite el valor y se deja el resto.
+    errores = [{k: v for k, v in e.items() if k != "input"} for e in exc.errors()]
+    return JSONResponse(status_code=422, content={"detail": jsonable_encoder(errores)})
 
 
 @app.get("/api/v1/salud")
